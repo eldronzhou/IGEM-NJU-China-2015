@@ -68,7 +68,7 @@ clear
     tlast = 0:0.01:250; %% min
 
 %% Step3 Initial Condition
-    Bcf =  3.5e4; % ug/L
+    Bcf =  300; % ug
     Bcf_origin = Bcf;
     Bcb = 0;
     Etbrain = 0;
