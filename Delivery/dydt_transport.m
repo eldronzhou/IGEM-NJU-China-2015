@@ -1,13 +1,8 @@
-%%% This pharmacokenetic module consists of modeling parameters, variables  
-%%% and equations about how exosomes transport to target cells via 
-%%% circulation after intravenous injection. The model is inspired by the
-%%% paper written by David Bartlett and Mark Davis, Nucleic Acids Research 2006.
-%%% PMID: 16410612
+%%% This file contains ODEs of pharmacokinetic models. 
 
 function deriv = dydt_transport(t,statevar)
- %%%%%%%%%% Model Parameters
- 
- %%%% Circulation/extracellular transport
+%% Model Parameters
+
     global AR 
     global partitionbrain partitionliver partitionlung partitionspleen partitionother
     global kblooddis kbloodbind ktransblood km
@@ -17,7 +12,7 @@ function deriv = dydt_transport(t,statevar)
     global Qbrain  Qlung Qliver Qspleen Qother Qc
     global kescendvec kc
     
-%%%%%%%%%% Model Variables
+%% Model Variables
 
     Bcf = statevar(1);
     Bcb = statevar(2);
@@ -38,14 +33,19 @@ function deriv = dydt_transport(t,statevar)
     other = statevar(17);
     Enc = statevar(18);
   
- %%%%%%%%%% Model Equations
+%% Model Equations
+    if Bcf<0
+        Bcf = 0;
+    end
+    
     dBcf = kblooddis*Bcb - kbloodbind*Bcf - ...
         (Etbrain + Etlung + Etliver + ...
         Etspleen + Etother);
     
     dBcb = kbloodbind*Bcf - kblooddis*Bcb;
    
-    dEtbrain = ktransblood*partitionbrain*Qbrain/Qc*Bcf - kbindbrain*Etbrain ;
+    dEtbrain = ktransblood*partitionbrain*Qbrain/Qc*Bcf - ...
+        kbindbrain*Etbrain - km*AR*Etbrain;
      
     dEtlung= ktransblood*partitionlung*Qlung/Qc*Bcf - kbindlung*Etlung ;
      

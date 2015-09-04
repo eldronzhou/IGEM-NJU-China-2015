@@ -1,8 +1,14 @@
+%%% This file contains codes simulating time-dependent tissue distribution
+%%% of exosomes without RVG modification. In order to run the simulation,
+%%% you need to put file 'dydt_transport.m'in the same diretory.The function 
+%%% 'xticklabel_rotate' is written by Brain Katz and available at Matlab
+%%% central.
+
 clear
-%%%%%%%%%% Step1: Define Constants
+
+%% Step1: Define Constants
 %%%%%%%%%% Model Parameters
  
- %%%% Circulation/extracellular transport
     global AR 
     global partitionbrain partitionliver partitionlung partitionspleen partitionother
     global kblooddis kbloodbind ktransblood km
@@ -10,19 +16,20 @@ clear
     global kintbrain kintliver kintlung kintspleen kintother
     global kelimtbrain kelimtliver kelimtlung kelimtspleen kelimtother
     global Qbrain  Qlung Qliver Qspleen Qother Qc
-    global kescendvec kunpackend kc kdegenc
+    global kescendvec kunpackend kc 
+    
     
     kblooddis = 1e-2/60; % min^-1
     kbloodbind = 1e-4/60; % min^-1
     ktransblood = 4e-1; % min^-1
   
-    AR = 1.3e10; % #
-    km = 2.4e-9; % #/min
+    AR = 0; % #
+    km = 1e-8; % #/min
     
     partitionbrain = 1e-1;
     partitionliver = 3.5e-1;
     partitionlung = 1.8e-2;
-    partitionspleen = 7e-2;
+    partitionspleen = 2e-1;
     partitionother = 1e-3;
     
     % min^-1
@@ -31,19 +38,19 @@ clear
     kbindliver = 1e2;
     kbindspleen = 1;
     kbindother = 1e-1;
-   
+    
     % min^-1
-    kintbrain = 1e-2;
+    kintbrain = 1e1;
     kintliver = 3e-2;
     kintlung = 1e2;
     kintspleen = 1e2;
     kintother = 2e1;
     
     % min^-1
-    kelimtbrain = 0.6e-1;
+    kelimtbrain = 0.2e-1;
     kelimtlung = 0.2e-1;
     kelimtliver = 0.6e-1;
-    kelimtspleen = 0.4e-2;
+    kelimtspleen = 0.4e-1;
     kelimtother = 0.5e-2;
     
     Qc = 5.58; % L/min
@@ -53,17 +60,16 @@ clear
     Qspleen = 0.10*Qc;
     Qother = (1-0.14-0.25-0.1)*Qc;
     
-    kescendvec = 1e-1/60;
-    kunpackend = 1e-3/60;
-    kc = 1e-15*6.02e23; % fmol/ug
-    kdegenc = 1e-1;
+    kescendvec = 1e-2/60; % min^-1
+    kunpackend = 1e-3/60; % min^-1
+    kc = 1e-11*6.02e23; % % convert pmol/ug to #/ug
     
-%%%%%%%%%% Step2 Define Simulation Time
-    tlast = 0:0.01:400; %% min
+%% Step2 Define Simulation Time
+    tlast = 0:0.01:250; %% min
 
-%%%%%%%%%% Step3 Initial Condition
-    Bcf = 3.5e4; % ug
-    Bcf_origin = 3.5e4;
+%% Step3 Initial Condition
+    Bcf =  3.5e4; % ug/L
+    Bcf_origin = Bcf;
     Bcb = 0;
     Etbrain = 0;
     Etlung = 0;
@@ -86,7 +92,7 @@ clear
         Etother,Tbbrain,Tblung,Tbliver,Tbspleen,Tbother,...
         brain,lung,liver,spleen,other,Enc];
     
-%%%%%%%%%% Step4 Run Simulation
+%% Step4 Run Simulation
     
     [time,statevars] = ode15s(@dydt_transport,tlast,statevar_i);
 
@@ -101,7 +107,7 @@ clear
     Tblung = statevars(:,9);
     Tbliver = statevars(:,10);
     Tbspleen = statevars(:,11);
-    Tbslow = statevars(:,12);
+    Tbother = statevars(:,12);
     brain = statevars(:,13);
     lung = statevars(:,14);
     liver = statevars(:,15);
@@ -109,8 +115,7 @@ clear
     other = statevars(:,17);
     Enc = statevars(:,18);
    
-%%%%%%%%%% Step5 Plot Results
-    
+%% Step5 Plot/Save Results
 
     colors = repmat('krgbmcy',1,300);
     tissue = char('blood','brain','lung','liver','spleen','other'); 
@@ -128,7 +133,8 @@ clear
     ylabel('Percentage of total exosomes','FontSize',14);
     
     
-    %%%% barplot
+    %%%% Barplot
+    
     %%% group time = 1min
     i_1 = find(round(time)==1);
     i_1 = i_1(1);
@@ -174,9 +180,4 @@ clear
     ylabel('Percentage of total exosomes','FontSize',14);
     legend('1min','5min','10min','30min','60min','240min','Location','Eastoutside')
 
-    figure
-    plot(time/60,Enc)
-
-%%%%%%%%%% Step6 Parameter Sensitivity Analysis
-parameters = [partitionbrain partitionliver partitionlung partitionspleen partitionother];
-
+  
