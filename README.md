@@ -5,4 +5,4 @@ The model consists of three modules: delivery module, RNAi module and signaling 
 
 Detailed description of modeling work is available on our website:
 
-http://2015.igem.org/Team:NJU-China/Modeling
+http://2015.igem.org/NJU-China-model.html
